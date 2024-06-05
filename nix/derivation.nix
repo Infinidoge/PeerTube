@@ -15,7 +15,13 @@ stdenv.mkDerivation rec {
   pname = "peertube";
   version = "unstable";
 
-  src = ./..;
+  src = lib.cleanSourceWith {
+    src = ./..;
+    filter = name: type:
+      let baseName = baseNameOf (toString name); in !(
+        (baseName == "nix" && type == "directory")
+      );
+  };
 
   yarnOfflineCacheServer = fetchYarnDeps {
     yarnLock = "${src}/yarn.lock";
