@@ -20,6 +20,10 @@
         peertube = pkgs.callPackage ./nix/derivation.nix { bcryptLib = bcrypt; };
         default = peertube;
       };
+      checks = {
+        inherit (config.packages) peertube;
+        nixosTest = pkgs.callPackage ./nix/nixosTest.nix { inherit (config.packages) peertube; };
+      };
     };
   };
 }
