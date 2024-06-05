@@ -441,6 +441,9 @@ in
         ++ lib.optionals cfg.database.createLocally [ "postgresql.service" "peertube-init-db.service" ];
       wantedBy = [ "multi-user.target" ];
 
+      startLimitBurst = 5;
+      startLimitIntervalSec = 300;
+
       environment = env;
 
       path = with pkgs; [ nodejs_18 yarn ffmpeg-headless openssl ];
@@ -478,8 +481,6 @@ in
         Restart = "always";
         RestartSec = 20;
         TimeoutSec = 60;
-        StartLimitBurst = 5;
-        StartLimitIntervalSec = 300;
         WorkingDirectory = cfg.package;
         SyslogIdentifier = "peertube";
         # User and group
