@@ -136,8 +136,9 @@ stdenv.mkDerivation (finalAttrs: rec {
       --exec brotli --best -f {} -o {}.br
   '';
 
-  passthru.tests = {
-    simple = callPackage ./tests/simple.nix { peertube = finalAttrs.finalPackage; };
+  passthru.tests = let peertube = finalAttrs.finalPackage; in {
+    simple = callPackage ./tests/simple.nix { inherit peertube; };
+    declarativePlugins = callPackage ./tests/declarativePlugins.nix { inherit peertube; };
   };
 
 

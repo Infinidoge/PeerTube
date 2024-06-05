@@ -31,7 +31,7 @@
       };
       checks = {
         inherit (config.packages) peertube;
-        inherit (config.packages.peertube.tests) simple;
+        inherit (config.packages.peertube.tests) simple declarativePlugins;
       };
     };
   };
