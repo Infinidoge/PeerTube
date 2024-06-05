@@ -334,13 +334,61 @@ export class PluginManager implements ServerHook {
 
   // ###################### Installation ######################
 
+  async installDeclarativePlugins () {
+    let declaredPlugins
+    try {
+      declaredPlugins = await readJSON(join(CONFIG.STORAGE.PLUGINS_DIR, "declarative_plugins.json"));
+    }
+    catch (err) {
+      logger.warn("Couldn't find/open declarative plugins file")
+      return
+    }
+
+    const existingDeclaredPlugins: PluginModel[] = await PluginModel.listDeclarativePluginsAndThemes()
+
+    for (const plugin of existingDeclaredPlugins) {
+      const npmName = PluginModel.buildNpmName(plugin.name, plugin.type)
+      if (!(npmName in declaredPlugins)) {
+        logger.info("Removing previously declared plugin %s", npmName)
+        await this.uninstall({npmName: npmName})
+      }
+      else {
+        logger.info("Unregistering still-declared plugin %s.", npmName)
+        await this.unregister(npmName)
+      }
+    }
+
+    for (const npmName of Object.keys(declaredPlugins)) {
+      const { pluginPath = null, version = null } = declaredPlugins[npmName];
+      if (pluginPath != null) {
+        logger.info("Installing declared plugin %s from disk (path %s).", npmName, pluginPath)
+        await this.install({
+          toInstall: pluginPath,
+          fromDisk: true,
+          declarative: true,
+        })
+      }
+      else if (version != null) {
+        logger.info("Installing declared plugin %s (version %s) from npm", npmName, version)
+        await this.install({
+          toInstall: npmName,
+          version: version,
+          declarative: true,
+        })
+      }
+    }
+
+    this.sortHooksByPriority()
+  }
+
   async install (options: {
     toInstall: string
     version?: string
     fromDisk?: boolean // default false
     register?: boolean // default true
+    declarative?: boolean // default false
   }) {
-    const { toInstall, version, fromDisk = false, register = true } = options
+    const { toInstall, version, fromDisk = false, register = true, declarative = false } = options
 
     let plugin: PluginModel
     let npmName: string
@@ -368,6 +416,7 @@ export class PluginManager implements ServerHook {
         version: packageJSON.version,
         enabled: true,
         uninstalled: false,
+        declarative: declarative,
         peertubeEngine: packageJSON.engine.peertube
       }, { returning: true })
 
