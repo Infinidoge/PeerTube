@@ -368,6 +368,7 @@ in
           avatars = lib.mkDefault "/var/lib/peertube/storage/avatars/";
           web_videos = lib.mkDefault "/var/lib/peertube/storage/web-videos/";
           streaming_playlists = lib.mkDefault "/var/lib/peertube/storage/streaming-playlists/";
+          original_video_files = lib.mkDefault "/var/lib/peertube/storage/original-video-files/";
           redundancy = lib.mkDefault "/var/lib/peertube/storage/redundancy/";
           logs = lib.mkDefault "/var/lib/peertube/storage/logs/";
           previews = lib.mkDefault "/var/lib/peertube/storage/previews/";
