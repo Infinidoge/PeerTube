@@ -1,7 +1,7 @@
 { lib
 , stdenv
 , fetchYarnDeps
-, nixosTests
+, callPackage
 , brotli
 , fixup-yarn-lock
 , jq
@@ -11,7 +11,7 @@
 , yarn
 , bcryptLib
 }:
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: rec {
   pname = "peertube";
   version = "unstable";
 
@@ -136,7 +136,10 @@ stdenv.mkDerivation rec {
       --exec brotli --best -f {} -o {}.br
   '';
 
-  passthru.tests.peertube = nixosTests.peertube;
+  passthru.tests = {
+    simple = callPackage ./tests/simple.nix { peertube = finalAttrs.finalPackage; };
+  };
+
 
   meta = with lib; {
     description = "A free software to take back control of your videos";
@@ -158,4 +161,4 @@ stdenv.mkDerivation rec {
     homepage = "https://joinpeertube.org/";
     platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
   };
-}
+})

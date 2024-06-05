@@ -42,7 +42,7 @@ nixosTest ({ pkgs, ... }:
     };
 
     server = { pkgs, ... }: {
-      imports = [ ./module.nix ];
+      imports = [ ../module.nix ];
       disabledModules = [ "services/web-apps/peertube.nix" ];
 
       environment = {

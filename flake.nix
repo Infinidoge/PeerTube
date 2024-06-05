@@ -22,7 +22,7 @@
       };
       checks = {
         inherit (config.packages) peertube;
-        nixosTest = pkgs.callPackage ./nix/nixosTest.nix { inherit (config.packages) peertube; };
+        inherit (config.packages.peertube.tests) simple;
       };
     };
   };
