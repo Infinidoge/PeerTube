@@ -119,7 +119,7 @@ in
 
     dataDirs = lib.mkOption {
       type = lib.types.listOf lib.types.path;
-      default = [ ];
+      default = [ "/var/lib/peertube" ];
       example = [ "/opt/peertube/storage" "/var/cache/peertube" ];
       description = "Allow access to custom data locations.";
     };

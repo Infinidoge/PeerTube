@@ -24,13 +24,16 @@
           inputs.ngipkgs.overlays.default
         ];
       };
+
       packages = rec {
         bcrypt = pkgs.callPackage ./nix/bcrypt.nix { };
         peertube = pkgs.callPackage ./nix/derivation.nix { bcryptLib = bcrypt; inherit yarnifyPlugin; };
         default = peertube;
+        inherit (pkgs) peertube-plugin-hello-world;
 
         yarnifyPlugin = pkgs.callPackage ./nix/yarnifyPlugin.nix { };
       };
+
       checks = {
         inherit (config.packages) peertube;
         inherit (config.packages.peertube.tests) simple declarativePlugins;
