@@ -359,13 +359,14 @@ export class PluginManager implements ServerHook {
     }
 
     for (const npmName of Object.keys(declaredPlugins)) {
-      const { pluginPath = null, version = null } = declaredPlugins[npmName];
+      const { pluginPath = null, version = null, extraArgs = null } = declaredPlugins[npmName];
       if (pluginPath != null) {
         logger.info("Installing declared plugin %s from disk (path %s).", npmName, pluginPath)
         await this.install({
           toInstall: pluginPath,
           fromDisk: true,
           declarative: true,
+          extraArgs: extraArgs,
         })
       }
       else if (version != null) {
@@ -374,6 +375,7 @@ export class PluginManager implements ServerHook {
           toInstall: npmName,
           version: version,
           declarative: true,
+          extraArgs: extraArgs,
         })
       }
     }
@@ -387,8 +389,9 @@ export class PluginManager implements ServerHook {
     fromDisk?: boolean // default false
     register?: boolean // default true
     declarative?: boolean // default false
+    extraArgs?: string // default empty
   }) {
-    const { toInstall, version, fromDisk = false, register = true, declarative = false } = options
+    const { toInstall, version, fromDisk = false, register = true, declarative = false, extraArgs = null } = options
 
     let plugin: PluginModel
     let npmName: string
@@ -397,8 +400,8 @@ export class PluginManager implements ServerHook {
 
     try {
       fromDisk
-        ? await installNpmPluginFromDisk(toInstall)
-        : await installNpmPlugin(toInstall, version)
+        ? await installNpmPluginFromDisk(toInstall, extraArgs)
+        : await installNpmPlugin(toInstall, version, extraArgs)
 
       npmName = fromDisk ? basename(toInstall) : toInstall
       const pluginType = PluginModel.getTypeFromNpmName(npmName)
