@@ -169,7 +169,7 @@ in
     # Check PeerTube CLI version
     client.succeed('peertube-cli auth add -u "http://peertube.local:9000" -U "root" --password "zw4SqYVdcsXUfRX8aaFX"')
 
-    client.wait_until_succeeds('peertube-cli plugins list | grep "hello-world"')
+    client.wait_until_succeeds('peertube-cli plugins list | grep "hello-world"', timeout=5)
 
     client.succeed('peertube-cli auth list | grep "http://peertube.local:9000"')
     client.succeed('peertube-cli auth del "http://peertube.local:9000"')
