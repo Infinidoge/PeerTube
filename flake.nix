@@ -26,8 +26,10 @@
       };
       packages = rec {
         bcrypt = pkgs.callPackage ./nix/bcrypt.nix { };
-        peertube = pkgs.callPackage ./nix/derivation.nix { bcryptLib = bcrypt; };
+        peertube = pkgs.callPackage ./nix/derivation.nix { bcryptLib = bcrypt; inherit yarnifyPlugin; };
         default = peertube;
+
+        yarnifyPlugin = pkgs.callPackage ./nix/yarnifyPlugin.nix { };
       };
       checks = {
         inherit (config.packages) peertube;
