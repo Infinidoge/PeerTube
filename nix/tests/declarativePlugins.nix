@@ -1,5 +1,12 @@
-{ nixosTest, peertube }:
-nixosTest ({ pkgs, ... }:
+{ nixosTest, peertube, yarnifyPlugin }:
+nixosTest ({ pkgs, lib, ... }:
+let
+  mkYarnrc = deps: pkgs.writeText "yarnrc" ''
+    yarn-offline-mirror "${deps}"
+  '';
+
+  pluginPath = pkg: "${pkg}/lib/node_modules/${pkg.pname}";
+in
 {
   name = "peertube";
   meta.maintainers = with pkgs.lib.maintainers; [ izorkin ];
@@ -76,10 +83,15 @@ nixosTest ({ pkgs, ... }:
 
       systemd.tmpfiles.rules =
         let
-          plugin = pkg: "${pkg}/lib/node_modules/${pkg.pname}";
+          plugin = yarnifyPlugin {
+            plugin = pkgs.peertube-plugin-hello-world;
+            yarnLockHash = "sha256-l1yLJLaXFB1rcnx8BFIXdjQDIanzMY/54kupV/KgUGc=";
+            yarnDepsHash = "sha256-8uH4Vn60joP2ZFybYuOvSPgJtzaMZt+rJJ/CBPaiZMA=";
+          };
           plugins = pkgs.writers.writeJSON "declarative_plugins.json" {
-            "peertube-plugins-hello-world" = {
-              pluginPath = plugin pkgs.peertube-plugin-hello-world;
+            "peertube-plugin-hello-world" = {
+              pluginPath = pluginPath plugin;
+              extraArgs = "--verbose --use-yarnrc ${mkYarnrc plugin.yarnDeps}";
             };
           };
         in

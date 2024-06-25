@@ -1,6 +1,7 @@
 { lib
 , stdenv
 , fetchYarnDeps
+, yarnifyPlugin
 , callPackage
 , brotli
 , fixup-yarn-lock
@@ -135,7 +136,7 @@ stdenv.mkDerivation (finalAttrs: rec {
 
   passthru.tests = let peertube = finalAttrs.finalPackage; in {
     simple = callPackage ./tests/simple.nix { inherit peertube; };
-    declarativePlugins = callPackage ./tests/declarativePlugins.nix { inherit peertube; };
+    declarativePlugins = callPackage ./tests/declarativePlugins.nix { inherit peertube; inherit yarnifyPlugin; };
   };
 
 
