@@ -16,11 +16,8 @@ stdenv.mkDerivation (finalAttrs: rec {
   version = "unstable";
 
   src = lib.cleanSourceWith {
-    src = ./..;
-    filter = name: type:
-      let baseName = baseNameOf (toString name); in !(
-        (baseName == "nix" && type == "directory")
-      );
+    filter = name: type: !(lib.hasSuffix ".nix" name);
+    src = (lib.cleanSource ./..);
   };
 
   yarnOfflineCacheServer = fetchYarnDeps {
