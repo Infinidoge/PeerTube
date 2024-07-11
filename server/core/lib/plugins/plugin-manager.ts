@@ -359,7 +359,19 @@ export class PluginManager implements ServerHook {
     }
 
     for (const npmName of Object.keys(declaredPlugins)) {
-      const { pluginPath = null, version = null, extraArgs = null } = declaredPlugins[npmName];
+      const {
+        pluginPath = null,
+        version = null,
+        extraArgs = null,
+        preInstall = null,
+        postInstall = null
+      } = declaredPlugins[npmName];
+
+      if (preInstall != null) {
+        logger.info("Running pre-install command for plugin %s")
+        execShell(preInstall, { cwd: pluginDirectory })
+      }
+
       if (pluginPath != null) {
         logger.info("Installing declared plugin %s from disk (path %s).", npmName, pluginPath)
         await this.install({
@@ -377,6 +389,11 @@ export class PluginManager implements ServerHook {
           declarative: true,
           extraArgs: extraArgs,
         })
+      }
+
+      if (postInstall != null) {
+        logger.info("Running post-install command for plugin %s")
+        execShell(postInstall, { cwd: pluginDirectory })
       }
     }
 
