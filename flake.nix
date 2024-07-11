@@ -4,6 +4,9 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
 
+    devshell.url = "github:numtide/devshell";
+    devshell.inputs.nixpkgs.follows = "nixpkgs";
+
     ngipkgs.url = "github:ngi-nix/ngipkgs/init/peertube-plugins/hello-world";
     ngipkgs.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -11,6 +14,10 @@
   outputs = inputs@{ flake-parts, self, nixpkgs, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
     systems = [
       "x86_64-linux"
+    ];
+
+    imports = [
+      inputs.devshell.flakeModule
     ];
 
     flake = {
@@ -37,6 +44,13 @@
       checks = {
         inherit (config.packages) peertube;
         inherit (config.packages.peertube.tests) simple declarativePlugins;
+      };
+
+      devshells.default = {
+        devshell.packages = with pkgs; [
+          nodejs
+          yarn
+        ];
       };
     };
   };
