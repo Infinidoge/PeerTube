@@ -20,6 +20,7 @@ import { decachePlugin } from '@server/helpers/decache.js'
 import { ApplicationModel } from '@server/models/application/application.js'
 import { MOAuthTokenUser, MUser } from '@server/types/models/index.js'
 import { isLibraryCodeValid, isPackageJSONValid } from '../../helpers/custom-validators/plugins.js'
+import { execShell } from '../../helpers/core-utils.js'
 import { logger } from '../../helpers/logger.js'
 import { CONFIG } from '../../initializers/config.js'
 import { PLUGIN_GLOBAL_CSS_PATH } from '../../initializers/constants.js'
@@ -335,9 +336,11 @@ export class PluginManager implements ServerHook {
   // ###################### Installation ######################
 
   async installDeclarativePlugins () {
+    const pluginDirectory = CONFIG.STORAGE.PLUGINS_DIR
+    logger.info("Plugin Directory: %s", pluginDirectory)
     let declaredPlugins
     try {
-      declaredPlugins = await readJSON(join(CONFIG.STORAGE.PLUGINS_DIR, "declarative_plugins.json"));
+      declaredPlugins = await readJSON(join(pluginDirectory, "declarative_plugins.json"));
     }
     catch (err) {
       logger.warn("Couldn't find/open declarative plugins file")
@@ -368,8 +371,14 @@ export class PluginManager implements ServerHook {
       } = declaredPlugins[npmName];
 
       if (preInstall != null) {
-        logger.info("Running pre-install command for plugin %s")
-        execShell(preInstall, { cwd: pluginDirectory })
+        logger.info("Running pre-install command for plugin %s.", npmName)
+        try {
+          await execShell(preInstall, { cwd: pluginDirectory })
+        } catch (result) {
+          logger.error("Cannot exec pre-install command.", { preInstall, err: result.err, stderr: result.stderr })
+
+          throw result.err
+        }
       }
 
       if (pluginPath != null) {
@@ -382,7 +391,7 @@ export class PluginManager implements ServerHook {
         })
       }
       else if (version != null) {
-        logger.info("Installing declared plugin %s (version %s) from npm", npmName, version)
+        logger.info("Installing declared plugin %s (version %s) from npm.", npmName, version)
         await this.install({
           toInstall: npmName,
           version: version,
@@ -392,8 +401,14 @@ export class PluginManager implements ServerHook {
       }
 
       if (postInstall != null) {
-        logger.info("Running post-install command for plugin %s")
-        execShell(postInstall, { cwd: pluginDirectory })
+        logger.info("Running post-install command for plugin %s.", npmName)
+        try {
+          await execShell(postInstall, { cwd: pluginDirectory })
+        } catch (result) {
+          logger.error("Cannot exec post-install command.", { postInstall, err: result.err, stderr: result.stderr })
+
+          throw result.err
+        }
       }
     }
 
