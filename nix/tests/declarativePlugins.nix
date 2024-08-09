@@ -1,10 +1,6 @@
 { nixosTest, peertube, yarnifyPlugin }:
 nixosTest ({ pkgs, lib, ... }:
 let
-  mkYarnrc = deps: pkgs.writeText "yarnrc" ''
-    yarn-offline-mirror "${deps}"
-  '';
-
   pluginPath = pkg: "${pkg}/lib/node_modules/${pkg.pname}";
 in
 {
@@ -90,8 +86,12 @@ in
           };
           plugins = pkgs.writers.writeJSON "declarative_plugins.json" {
             "peertube-plugin-hello-world" = {
+              preInstall = "cp --no-preserve=mode ${plugin.yarnDeps} /var/lib/peertube/storage/plugins/.yarn-offline-cache";
+              postInstall = "rm -rf /var/lib/peertube/storage/plugins/.yarn-offline-cache";
               pluginPath = pluginPath plugin;
-              extraArgs = "--verbose --use-yarnrc ${mkYarnrc plugin.yarnDeps}";
+              extraArgs = "--verbose --use-yarnrc ${pkgs.writeText "yarnrc" ''
+                yarn-offline-mirror "/var/lib/peertube/storage/plugins/.yarn-offline-cache"
+              ''}";
             };
           };
         in
