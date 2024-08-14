@@ -353,11 +353,11 @@ export class PluginManager implements ServerHook {
       const npmName = PluginModel.buildNpmName(plugin.name, plugin.type)
       if (!(npmName in declaredPlugins)) {
         logger.info("Removing previously declared plugin %s", npmName)
-        await this.uninstall({npmName: npmName})
+        await this.uninstall({npmName: npmName, unregister: false})
       }
       else {
-        logger.info("Unregistering still-declared plugin %s.", npmName)
-        await this.unregister(npmName)
+        logger.info("Keeping still-declared plugin %s.", npmName)
+        //await this.unregister(npmName)
       }
     }
 
