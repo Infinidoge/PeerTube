@@ -163,6 +163,8 @@ in
     server.wait_for_unit("peertube.service")
     server.wait_for_open_port(9000)
 
+    server.wait_for_console_text("HTTP server listening on 0.0.0.0:9000")
+
     # Check if PeerTube is running
     client.succeed("curl --fail http://peertube.local:9000/api/v1/config/about | jq -r '.instance.name' | grep 'PeerTube\ Test\ Server'")
 
